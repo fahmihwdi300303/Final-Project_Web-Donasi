@@ -22,9 +22,9 @@ Route::get('/', function () {
     return view('homepage');
 });
 
-Route::get('dashboard', function () {
-    return view = ('dashboard')
-})
+Route::get('/dashboard', function () {
+    return view('dashboard');
+});
 
 Route::get('/kegiatan', [App\Http\Controllers\KegiatanController::class, 'index']);
 
