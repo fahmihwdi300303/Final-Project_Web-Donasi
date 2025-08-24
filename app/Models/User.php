@@ -11,7 +11,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable,HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
     /**
      * The attributes that are mass assignable.
      *
@@ -21,7 +21,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
     ];
 
     /**
@@ -49,7 +48,7 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->hasRole('admin');
     }
 
     /**
@@ -57,7 +56,7 @@ class User extends Authenticatable
      */
     public function isDonatur(): bool
     {
-        return $this->role === 'donatur';
+        return $this->hasRole('donatur');
     }
 
     /**
@@ -65,15 +64,7 @@ class User extends Authenticatable
      */
     public function isUser(): bool
     {
-        return $this->role === 'user';
-    }
-
-    /**
-     * Check if user has specific role
-     */
-    public function hasRole(string $role): bool
-    {
-        return $this->role === $role;
+        return $this->hasRole('user');
     }
 
     public function donations()

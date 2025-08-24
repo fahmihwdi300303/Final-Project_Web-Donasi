@@ -19,8 +19,8 @@
             <div class="form-section">
                 <h1 class="form-title">Donasi Uang</h1>
                 <p class="form-subtitle">Bantu anak-anak yatim dengan donasi uang Anda</p>
-                
-                <form id="donasiForm" class="donasi-form" novalidate>
+
+                <form id="donasiForm" class="donasi-form" method="POST" action="{{ route('donations.store') }}" enctype="multipart/form-data" novalidate>
                     <!-- Personal Information -->
                     <div class="form-group">
                         <div class="form-row">
@@ -52,7 +52,6 @@
                             <div class="error-message" id="whatsappError"></div>
                         </div>
                     </div>
-
                     <!-- Donation Information -->
                     <div class="form-group">
                         <div class="form-field">
@@ -116,7 +115,7 @@
                             <p class="qr-description">QR Code Standar Pembayaran Nasional</p>
                         </div>
                     </div>
-                    
+
                     <div class="bank-section">
                         <h3 class="bank-title">Transfer Bank</h3>
                         <div class="bank-grid">
@@ -152,9 +151,9 @@
                     <span>FH</span>
                 </div>
             </div>
-            
+
             <div class="footer-divider"></div>
-            
+
             <div class="footer-social">
                 <a href="#" class="social-icon">
                     <i class="fab fa-facebook"></i>
@@ -169,7 +168,7 @@
                     <i class="fab fa-whatsapp"></i>
                 </a>
             </div>
-            
+
             <div class="footer-copyright">
                 <p>&copy; Since. 2025. Fahmi Huwaidi</p>
             </div>
