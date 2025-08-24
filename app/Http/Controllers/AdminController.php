@@ -18,4 +18,13 @@ class DashboardController extends Controller
 
         return view('admin.dashboard', compact('totalUsers', 'totalDonatur', 'totalAdmin'));
     }
+
+    public function dashboard()
+    {
+        if (auth()->user()->hasRole('admin')) {
+            // User is an admin
+        } else {
+            // User is not an admin
+        }
+    }
 }
