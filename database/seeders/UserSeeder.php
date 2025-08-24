@@ -2,32 +2,33 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        // Admin
-        DB::table('users')->insert([
-            'name' => 'akbar admin',
-            'email' => 'admin@lksa.org',
-            'password' => Hash::make('admin123'), // ubah sesuai kebutuhan
-            'role_id' => 1, // role_id = admin
-            'created_at' => now(),
-            'updated_at' => now(),
+        // Create an Admin User
+        $admin = User::create([
+            'name' => 'Admin',
+            'email' => 'admin@gmail.com',
+            'password' => Hash::make('password'), // Use a secure password
         ]);
+        // Assign the 'admin' role to the user
+        $admin->assignRole('admin');
 
-        // Donatur
-        DB::table('users')->insert([
-            'name' => 'Donatur puja',
-            'email' => 'donatur@lksa.org',
-            'password' => Hash::make('donatur123'), // ubah sesuai kebutuhan
-            'role_id' => 2, // role_id = donatur
-            'created_at' => now(),
-            'updated_at' => now(),
+        // Create a Donatur (Donor) User
+        $donatur = User::create([
+            'name' => 'Donatur',
+            'email' => 'donatur@gmail.com',
+            'password' => Hash::make('password'), // Use a secure password
         ]);
+        // Assign the 'donatur' role to the user
+        $donatur->assignRole('donatur');
     }
 }
