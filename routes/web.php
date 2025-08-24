@@ -94,3 +94,13 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])
         ->name('admin.dashboard');
 });
+
+Route::group(['middleware' => ['role:admin']], function () {
+    // Routes that only admins can access
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+});
+
+Route::group(['middleware' => ['role:donatur']], function () {
+    // Routes that only donaturs can access
+    Route::get('/donatur/dashboard', [DonaturController::class, 'dashboard'])->name('donatur.dashboard');
+});
