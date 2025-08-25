@@ -22,6 +22,81 @@
 
     {{-- Styles khusus halaman --}}
     @stack('styles')
+
+    <style>
+  /* === THEME: BLUE (scoped) ========================================= */
+  .theme-blue {
+    /* Bootstrap CSS variables */
+    --bs-primary: #2563eb;      /* blue-600 */
+    --bs-primary-rgb: 37, 99, 235;
+    --bs-link-color: #2563eb;
+    --bs-link-hover-color: #1d4ed8;
+    --bs-info: #38bdf8;         /* sky-400 */
+    --bs-warning: #fbbf24;      /* amber-400 */
+    --bs-success: #22c55e;      /* green-500 */
+    --bs-danger: #ef4444;       /* red-500 */
+
+    /* Optional: card & border tones */
+    --card-shadow: 0 8px 20px rgba(2, 6, 23, 0.06);
+    --soft-border: 1px solid rgba(2, 6, 23, 0.06);
+  }
+
+  /* Headings/sections feel */
+  .theme-blue .section-title{
+    font-weight:700; color:#0f172a; /* slate-900 */
+    border-left:4px solid var(--bs-primary); padding-left:.75rem;
+  }
+
+  /* Button & link consistency (no UI redesign, hanya warna) */
+  .theme-blue .btn-primary{
+    background-color: var(--bs-primary); border-color: var(--bs-primary);
+  }
+  .theme-blue .btn-outline{
+    border:1px solid var(--bs-primary); color:var(--bs-primary);
+  }
+  .theme-blue .btn-outline:hover{
+    background: rgba(var(--bs-primary-rgb), .08);
+  }
+  .theme-blue a{ color:var(--bs-link-color); }
+  .theme-blue a:hover{ color:var(--bs-link-hover-color); }
+
+  /* Tables */
+  .theme-blue table thead th{
+    background: rgba(var(--bs-primary-rgb), .06);
+    color:#0f172a;
+    border-bottom: var(--soft-border);
+  }
+  .theme-blue .table-hover tbody tr:hover{
+    background: rgba(var(--bs-primary-rgb), .04);
+  }
+
+  /* Cards */
+  .theme-blue .card{ box-shadow: var(--card-shadow); border: var(--soft-border); }
+
+  /* Badges defaulting closer to theme */
+  .theme-blue .badge.bg-info{ background-color: var(--bs-info)!important; }
+  .theme-blue .badge.bg-warning{ background-color: var(--bs-warning)!important; }
+  .theme-blue .badge.bg-success{ background-color: var(--bs-success)!important; }
+  .theme-blue .badge.bg-danger{ background-color: var(--bs-danger)!important; }
+
+  /* ===== Dashboard specific: stat-card & action-card ================== */
+  .theme-blue .stat-card{
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); /* deep blue → blue */
+    color:#fff; border-radius:12px; padding:1.5rem;
+    transition: transform .3s ease, box-shadow .3s ease;
+  }
+  .theme-blue .stat-card:hover{ transform:translateY(-5px); box-shadow: var(--card-shadow); }
+  .theme-blue .stat-icon{ font-size:2rem; opacity:.9; }
+
+  .theme-blue .action-card{
+    text-decoration:none; color:#0f172a; transition: all .3s ease;
+  }
+  .theme-blue .action-card:hover{
+    transform:translateY(-5px); color:var(--bs-primary);
+    box-shadow: var(--card-shadow);
+  }
+</style>
+
   </head>
   <body class="font-sans antialiased bg-gray-100">
     {{-- Navbar global --}}
@@ -38,9 +113,10 @@
 
     {{-- Page Content --}}
     <main class="py-4">
-      @yield('content')
+    <div class="theme-blue">
+        @yield('content')
+    </div>
     </main>
-
     {{-- Bootstrap JS bundle --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
