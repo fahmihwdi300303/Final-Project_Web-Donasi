@@ -99,8 +99,8 @@
 
   </head>
   <body class="font-sans antialiased bg-gray-100">
-    {{-- Navbar global --}}
-    @include('partials.navbar')
+    {{-- Navbar global: akan menampilkan menu berbeda tergantung role --}}
+    @include('partials.navbar.role-aware')
 
     {{-- Page Heading (opsional, dipakai jika $header diset) --}}
     @if (isset($header))

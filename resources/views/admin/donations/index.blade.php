@@ -66,4 +66,17 @@
     </div>
   </div>
 </div>
+<a href="{{ Route::has('admin.donations.show') ? route('admin.donations.show',$d->donation_id) : url('/admin/donations/'.$d->donation_id) }}"
+   class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
+
+<a href="{{ Route::has('admin.donations.edit') ? route('admin.donations.edit',$d->donation_id) : url('/admin/donations/'.$d->donation_id.'/edit') }}"
+   class="btn btn-sm btn-outline-secondary"><i class="fas fa-pen"></i></a>
+
+<form action="{{ Route::has('admin.donations.destroy') ? route('admin.donations.destroy',$d->donation_id) : url('/admin/donations/'.$d->donation_id) }}"
+      method="POST" class="d-inline">
+  @csrf @method('DELETE')
+  <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus donasi ini?')">
+    <i class="fas fa-trash"></i>
+  </button>
+</form>
 @endsection

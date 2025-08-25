@@ -44,6 +44,11 @@
     .table-responsive {
         margin-top: 1rem;
     }
+    .theme-blue .nav-link.active{
+    color: var(--bs-primary)!important;
+    border-bottom: 2px solid var(--bs-primary);
+    font-weight: 600;
+    }
 </style>
 
 @endpush
