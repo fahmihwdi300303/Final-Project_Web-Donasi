@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
@@ -13,22 +13,22 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create an Admin User
+        // Create the Admin user
         $admin = User::create([
             'name' => 'Admin',
-            'email' => 'admin@gmail.com',
-            'password' => Hash::make('password'), // Use a secure password
+            'email' => 'admin@lksa.org',
+            'password' => Hash::make('admin123'),
         ]);
-        // Assign the 'admin' role to the user
+        // Assign the 'admin' role using the Spatie package
         $admin->assignRole('admin');
 
-        // Create a Donatur (Donor) User
+        // Create a Donatur (Donor) user for testing
         $donatur = User::create([
             'name' => 'Donatur',
-            'email' => 'donatur@gmail.com',
-            'password' => Hash::make('password'), // Use a secure password
+            'email' => 'donatur@lksa.org',
+            'password' => Hash::make('donatur123'),
         ]);
-        // Assign the 'donatur' role to the user
+        // Assign the 'donatur' role using the Spatie package
         $donatur->assignRole('donatur');
     }
 }
