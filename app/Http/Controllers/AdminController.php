@@ -1,30 +1,30 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+// Lokasi: app/Http/Controllers/AdminController.php
 
-use App\Http\Controllers\Controller;
+namespace App\Http\Controllers; // Namespace diperbaiki
+
 use Illuminate\Http\Request;
 use App\Models\User;
 
-class DashboardController extends Controller
+class AdminController extends Controller // Nama Class diperbaiki
 {
-    // Menampilkan dashboard admin
-    public function index()
-    {
-        // Ambil data statistik (contoh)
-        $totalUsers = User::count();
-        $totalDonatur = User::where('role_id', 2)->count(); // role_id 2 = Donatur
-        $totalAdmin = User::where('role_id', 1)->count(); // role_id 1 = Admin
-
-        return view('admin.dashboard', compact('totalUsers', 'totalDonatur', 'totalAdmin'));
-    }
-
+    /**
+     * Menampilkan dashboard admin.
+     */
     public function dashboard()
     {
-        if (auth()->user()->hasRole('admin')) {
-            // User is an admin
-        } else {
-            // User is not an admin
+        // Pastikan hanya admin yang bisa mengakses, meskipun sudah ada middleware.
+        if (!auth()->user()->hasRole('admin')) {
+            abort(403, 'Anda tidak punya akses.');
         }
+
+        // Ambil data statistik
+        $totalUsers = User::count();
+        // Anda menggunakan Spatie/Permission, jadi gunakan relasi roles() untuk menghitung
+        $totalDonatur = User::role('donatur')->count();
+        $totalAdmin = User::role('admin')->count();
+
+        return view('admin.dashboard', compact('totalUsers', 'totalDonatur', 'totalAdmin'));
     }
 }
