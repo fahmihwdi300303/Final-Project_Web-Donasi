@@ -21,66 +21,66 @@ class AuthController extends Controller
     }
 
     public function login(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+{
+    $validator = Validator::make($request->all(), [
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        $credentials = $request->only('email', 'password');
-
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-
-            $user = Auth::user();
-            
-            // Redirect based on role
-            if ($user->isAdmin()) {
-                return redirect()->route('admin.dashboard')->with('success', 'Selamat datang Admin!');
-            } elseif ($user->isDonatur()) {
-                return redirect()->route('donatur.dashboard')->with('success', 'Selamat datang Donatur!');
-            } else {
-                return redirect()->route('user.dashboard')->with('success', 'Selamat datang!');
-            }
-        }
-
+    if ($validator->fails()) {
         return redirect()->back()
-            ->withErrors(['email' => 'Email atau password salah.'])
+            ->withErrors($validator)
             ->withInput();
     }
 
-    public function register(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+    $credentials = $request->only('email', 'password');
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
+
+        $user = Auth::user();
+
+        if ($user->hasRole('admin')) {
+            return redirect()->route('admin.dashboard')->with('success', 'Selamat datang Admin!');
+        } elseif ($user->hasRole('donatur')) {
+            return redirect()->route('donatur.dashboard')->with('success', 'Selamat datang Donatur!');
+        } else {
+            return redirect('/')->with('success', 'Selamat datang!');
         }
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'donatur', // Default role for new registrations
-        ]);
-
-        Auth::login($user);
-
-        return redirect()->route('donatur.dashboard')
-            ->with('success', 'Registrasi berhasil! Selamat datang sebagai Donatur.');
     }
+
+    return redirect()->back()
+        ->withErrors(['email' => 'Email atau password salah.'])
+        ->withInput();
+}
+
+    public function register(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:8|confirmed',
+    ]);
+
+    if ($validator->fails()) {
+        return redirect()->back()
+            ->withErrors($validator)
+            ->withInput();
+    }
+
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+    ]);
+
+    $user->assignRole('donatur'); // Assign the 'donatur' role
+
+    Auth::login($user);
+
+    return redirect()->route('donatur.dashboard')
+        ->with('success', 'Registrasi berhasil! Selamat datang sebagai Donatur.');
+}
 
 
     public function logout(Request $request)
