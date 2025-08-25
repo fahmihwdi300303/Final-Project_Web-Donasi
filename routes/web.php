@@ -80,7 +80,7 @@ Route::resource('images', App\Http\Controllers\ImageController::class);
 
 // route login bawaan Laravel
 Route::get('Auth', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('Auth', [AuthControllerr::class, 'login']);
+Route::post('Auth', [AuthController::class, 'login']);
 
 // route logout
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
@@ -95,9 +95,38 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
         ->name('admin.dashboard');
 });
 
+// TAMBAHKAN BLOK INI UNTUK MEMPERBAIKI ERROR PROFILE
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', function() {
+        // Untuk sementara, kita tampilkan teks saja.
+        // Nanti ini bisa diarahkan ke controller profile yang sesungguhnya.
+        return 'Ini adalah halaman profil pengguna.';
+    })->name('profile.edit');
+});
+
 Route::group(['middleware' => ['role:admin']], function () {
     // Routes that only admins can access
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
+    // =================================================================
+    // TAMBAHKAN SEMUA BARIS DI BAWAH INI UNTUK MEMPERBAIKI ERROR
+    // =================================================================
+    Route::get('/admin/users', function() {
+        return 'Halaman Manajemen Pengguna akan dibuat di sini.';
+    })->name('admin.users');
+
+    Route::get('/admin/donations', function() {
+        return 'Halaman Manajemen Donasi akan dibuat di sini.';
+    })->name('admin.donations');
+
+    Route::get('/admin/donation-report', function() {
+        return 'Halaman Laporan Donasi akan dibuat di sini.';
+    })->name('admin.donation-report');
+
+    Route::get('/admin/financial-report', function() {
+        return 'Halaman Laporan Keuangan akan dibuat di sini.';
+    })->name('admin.financial-report');
+    // =================================================================
 });
 
 Route::group(['middleware' => ['role:donatur']], function () {

@@ -25,6 +25,7 @@ class AdminController extends Controller // Nama Class diperbaiki
         $totalDonatur = User::role('donatur')->count();
         $totalAdmin = User::role('admin')->count();
 
-        return view('admin.dashboard', compact('totalUsers', 'totalDonatur', 'totalAdmin'));
+        // Pastikan baris ini mengarah ke 'admin.dashboard'
+    return view('admin.dashboard', compact('totalUsers', 'totalDonatur', 'totalAdmin'));
     }
 }

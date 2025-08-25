@@ -20,11 +20,9 @@ class DonaturController extends Controller
     $activities = [
         ['id' => 1, 'type' => 'Uang', 'amount' => 100000, 'status' => 'verified', 'date' => now()->subDays(5)],
             ['id' => 2, 'type' => 'Barang', 'description' => 'Buku Pelajaran', 'status' => 'pending', 'date' => now()->subDays(2)],
-        ];         
+        ];
         return view('donatur.dashboard', compact('user', 'activities'));
 }
-        
-
 
     public function donationForm()
     {
@@ -42,7 +40,7 @@ class DonaturController extends Controller
 
         // Placeholder for donation submission
         // In real implementation, this would save to database
-        
+
         return redirect()->route('donatur.dashboard')
             ->with('success', 'Donasi berhasil disubmit dan sedang menunggu validasi.');
     }
@@ -54,7 +52,7 @@ class DonaturController extends Controller
             ['id' => 1, 'donatur' => 'John Doe', 'type' => 'Uang', 'amount' => 100000, 'date' => now()->subDays(1)],
             ['id' => 2, 'donatur' => 'Jane Smith', 'type' => 'Barang', 'description' => 'Buku Pelajaran', 'date' => now()->subDays(2)],
         ];
-        
+
         return view('donatur.donation-validation', compact('pendingDonations'));
     }
 
@@ -67,9 +65,9 @@ class DonaturController extends Controller
 
         // Placeholder for donation validation
         // In real implementation, this would update database
-        
+
         $status = $request->status === 'verified' ? 'diverifikasi' : 'ditolak';
-        
+
         return redirect()->back()
             ->with('success', "Donasi berhasil {$status}.");
     }
@@ -82,21 +80,21 @@ class DonaturController extends Controller
             ['month' => 'Februari', 'total' => 2000000, 'count' => 20, 'verified' => 18],
             ['month' => 'Maret', 'total' => 1750000, 'count' => 18, 'verified' => 16],
         ];
-        
+
         return view('donatur.donation-report', compact('reports'));
     }
 
     public function myDonations()
     {
         $user = auth()->user();
-        
+
         // Placeholder for user's donations
         $donations = [
             ['id' => 1, 'type' => 'Uang', 'amount' => 100000, 'status' => 'verified', 'date' => now()->subDays(5)],
             ['id' => 2, 'type' => 'Barang', 'description' => 'Buku Pelajaran', 'status' => 'pending', 'date' => now()->subDays(2)],
             ['id' => 3, 'type' => 'Uang', 'amount' => 50000, 'status' => 'rejected', 'date' => now()->subDays(10)],
         ];
-        
+
         return view('donatur.my-donations', compact('donations'));
     }
 }

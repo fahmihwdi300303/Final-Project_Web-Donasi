@@ -16,7 +16,8 @@
         </div>
         <h1 id="login-title" class="auth-title">Masuk ke Akun Anda</h1>
 
-        <form id="loginForm" class="auth-form" novalidate>
+        <form action="{{ route('login') }}" method="POST" class="auth-form" novalidate>
+            @csrf
             <div class="form-group">
                 <label for="email">Email</label>
                 <input id="email" name="email" type="email" placeholder="Email" autocomplete="email" required>
@@ -29,8 +30,7 @@
                 <small class="error" data-error-for="password" aria-live="polite"></small>
             </div>
 
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Masuk</button>
+            <div class="form-group"> <button type="submit" class="btn btn-primary">Masuk</button>
             </div>
         </form>
 
