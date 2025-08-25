@@ -20,7 +20,7 @@
                 <h1 class="form-title">Donasi Uang</h1>
                 <p class="form-subtitle">Bantu anak-anak yatim dengan donasi uang Anda</p>
 
-                <form id="donasiForm" class="donasi-form" method="POST" action="{{ route('donations.store') }}" enctype="multipart/form-data" novalidate>
+                <form id="donasiForm" class="donasi-form" novalidate>
                     <!-- Personal Information -->
                     <div class="form-group">
                         <div class="form-row">
