@@ -140,3 +140,12 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::view('/reports/donation',  'admin.reports.donation');      // /admin/reports/donation
     Route::view('/reports/financial', 'admin.reports.financial');     // /admin/reports/financial
 });
+
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    // CRUD index sudah kamu akses via fallback /admin/donations & /admin/users
+    Route::view('/donations/create-money',  'admin.donations.create-money');
+    Route::view('/donations/create-goods',  'admin.donations.create-goods');
+
+    // Laporan donasi (admin)
+    Route::view('/reports/donation', 'admin.reports.donation');
+});
