@@ -133,3 +133,10 @@ Route::group(['middleware' => ['role:donatur']], function () {
     // Routes that only donaturs can access
     Route::get('/donatur/dashboard', [DonaturController::class, 'dashboard'])->name('donatur.dashboard');
 });
+
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::view('/donations', 'admin.donations.index');               // /admin/donations
+    Route::view('/users',     'admin.users.index');                   // /admin/users
+    Route::view('/reports/donation',  'admin.reports.donation');      // /admin/reports/donation
+    Route::view('/reports/financial', 'admin.reports.financial');     // /admin/reports/financial
+});
