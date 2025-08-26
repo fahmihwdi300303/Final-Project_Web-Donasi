@@ -37,7 +37,6 @@ class DonaturController extends Controller
             'description' => 'required_if:type,barang|string|max:500',
             'quantity' => 'required_if:type,barang|numeric|min:1',
         ]);
-
         // Placeholder for donation submission
         // In real implementation, this would save to database
 
