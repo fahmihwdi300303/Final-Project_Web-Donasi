@@ -20,11 +20,23 @@
     {{-- Tailwind (dipertahankan bila halaman lain ada yang pakai) --}}
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
     {{-- Styles khusus halaman --}}
     @stack('styles')
 
     <style>
   /* === THEME: BLUE (scoped) ========================================= */
+
+  .theme-blue{
+    --bs-primary:#2563eb; --bs-primary-rgb:37,99,235;
+    --bs-info:#38bdf8; --bs-warning:#fbbf24; --bs-success:#22c55e; --bs-danger:#ef4444;
+  }
+  .theme-blue .nav-link.active{color:var(--bs-primary)!important;border-bottom:2px solid var(--bs-primary);font-weight:600}
+  .theme-blue .card{box-shadow:0 8px 20px rgba(2,6,23,.06);border:1px solid rgba(2,6,23,.06)}
+  .theme-blue table thead th{background:rgba(var(--bs-primary-rgb),.06);border-bottom:1px solid rgba(2,6,23,.06)}
+  .theme-blue .table-hover tbody tr:hover{background:rgba(var(--bs-primary-rgb),.04)}
   .theme-blue {
     /* Bootstrap CSS variables */
     --bs-primary: #2563eb;      /* blue-600 */
@@ -49,17 +61,25 @@
 
   /* Button & link consistency (no UI redesign, hanya warna) */
   .theme-blue .btn-primary{
-    background-color: var(--bs-primary); border-color: var(--bs-primary);
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color:#fff;                          /* <- ini kunci */
   }
-  .theme-blue .btn-outline{
-    border:1px solid var(--bs-primary); color:var(--bs-primary);
-  }
-  .theme-blue .btn-outline:hover{
-    background: rgba(var(--bs-primary-rgb), .08);
-  }
-  .theme-blue a{ color:var(--bs-link-color); }
-  .theme-blue a:hover{ color:var(--bs-link-hover-color); }
-
+.theme-blue .btn-outline{
+  border:1px solid var(--bs-primary);
+  color:var(--bs-primary);
+}
+.theme-blue .btn-primary:hover{
+  filter: brightness(.95);
+  color:#fff;
+}
+.theme-blue .btn-outline{
+  border:1px solid var(--bs-primary);
+  color:var(--bs-primary);
+}
+.theme-blue .btn-outline:hover{
+  background: rgba(var(--bs-primary-rgb), .08);
+}
   /* Tables */
   .theme-blue table thead th{
     background: rgba(var(--bs-primary-rgb), .06);
@@ -122,5 +142,19 @@
 
     {{-- Scripts khusus halaman --}}
     @stack('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-2.0.8/r-3.0.2/datatables.min.css">
+    <script src="https://cdn.datatables.net/v/bs5/dt-2.0.8/r-3.0.2/datatables.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('table.table-admin').forEach(tbl => {
+        new DataTable(tbl, {
+            responsive:true, autoWidth:false, pageLength:10,
+            language:{ url:'https://cdn.datatables.net/plug-ins/2.0.8/i18n/id.json' }
+        });
+        });
+    });
+    </script>
+
   </body>
 </html>
