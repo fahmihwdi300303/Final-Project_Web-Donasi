@@ -10,12 +10,20 @@ class Donation extends Model
     use HasFactory;
 
     protected $table = 'donations';
-    protected $primaryKey = 'donation_id'; // penting: di Blade kamu pakai donation_id
+    protected $primaryKey = 'donation_id';
     public $incrementing = true;
     protected $keyType = 'int';
 
     protected $fillable = [
-        'user_id', 'jumlah', 'metode_pembayaran', 'status', 'catatan'
+        'user_id',
+        'jumlah',                // decimal(15,2)
+        'metode_pembayaran',
+        'bukti_transfer',        // ada di DB
+        'status',                // pending / verified / rejected
+    ];
+
+    protected $casts = [
+        'jumlah' => 'decimal:2',
     ];
 
     public function user()
