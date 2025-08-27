@@ -9,8 +9,7 @@
 
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h4 mb-0">Manajemen Pengguna</h1>
-    <a href="{{ Route::has('admin.users.create') ? route('admin.users.create') : url('/admin/users/create') }}"
-       class="btn btn-primary"><i class="fas fa-user-plus me-1"></i> Tambah User</a>
+    <a href="{{ route('admin.users.create') }}" class="btn btn-primary"><i class="fas fa-user-plus me-1"></i> Tambah User</a>
   </div>
 
   <div class="card">
@@ -40,17 +39,14 @@
                 <td><span class="badge bg-info">{{ ucfirst($role) }}</span></td>
                 <td>{{ data_get($u,'created_at') ? \Carbon\Carbon::parse($u->created_at)->format('d/m/Y') : '—' }}</td>
                 <td class="text-end">
-                  <a href="{{ Route::has('admin.users.show') ? route('admin.users.show',$id) : url('/admin/users/'.$id) }}"
-                     class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
-                  <a href="{{ Route::has('admin.users.edit') ? route('admin.users.edit',$id) : url('/admin/users/'.$id.'/edit') }}"
-                     class="btn btn-sm btn-outline-secondary"><i class="fas fa-pen"></i></a>
-                  <form action="{{ Route::has('admin.users.destroy') ? route('admin.users.destroy',$id) : url('/admin/users/'.$id) }}"
-                        method="POST" class="d-inline">
+                    <a href="{{ route('admin.users.show', $id) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
+                    <a href="{{ route('admin.users.edit', $id) }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-pen"></i></a>
+                    <form action="{{ route('admin.users.destroy', $id) }}" method="POST" class="d-inline">
                     @csrf @method('DELETE')
                     <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus pengguna ini?')">
-                      <i class="fas fa-trash"></i>
+                        <i class="fas fa-trash"></i>
                     </button>
-                  </form>
+                    </form>
                 </td>
               </tr>
             @empty

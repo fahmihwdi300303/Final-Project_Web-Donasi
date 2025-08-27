@@ -9,8 +9,7 @@
 
   <div class="card">
     <div class="card-body">
-      <form action="{{ Route::has('admin.users.store') ? route('admin.users.store') : url('/admin/users') }}"
-            method="POST">
+      <form action="{{ route('admin.users.store') }}" method="POST">
         @csrf
         <div class="row g-3">
           <div class="col-md-6">
@@ -34,8 +33,7 @@
           </div>
         </div>
         <div class="d-flex justify-content-end gap-2 mt-4">
-          <a href="{{ Route::has('admin.users.index') ? route('admin.users.index') : url('/admin/users') }}"
-             class="btn btn-outline">Batal</a>
+          <a href="{{ route('admin.users.index') }}" class="btn btn-outline">Batal</a>
           <button class="btn btn-primary">Simpan</button>
         </div>
       </form>

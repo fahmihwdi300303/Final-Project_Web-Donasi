@@ -10,8 +10,7 @@
   <div class="card">
     <div class="card-body">
       @php $id = data_get($user,'id'); @endphp
-      <form action="{{ Route::has('admin.users.update') ? route('admin.users.update',$id) : url('/admin/users/'.$id) }}"
-            method="POST">
+      <form action="{{ route('admin.users.update', $id) }}" method="POST">
         @csrf @method('PUT')
         <div class="row g-3">
           <div class="col-md-6">
@@ -36,8 +35,7 @@
           </div>
         </div>
         <div class="d-flex justify-content-end gap-2 mt-4">
-          <a href="{{ Route::has('admin.users.index') ? route('admin.users.index') : url('/admin/users') }}"
-             class="btn btn-outline">Kembali</a>
+          <a href="{{ route('admin.users.index') }}" class="btn btn-outline">Kembali</a>
           <button class="btn btn-primary">Update</button>
         </div>
       </form>
