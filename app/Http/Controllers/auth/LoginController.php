@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class LoginController extends Controller
 {
     public function showLoginForm()
     {
-        return view('login'); // UI-mu sudah ada
+        return view('login');
     }
 
     public function login(Request $request)
@@ -25,25 +26,24 @@ class LoginController extends Controller
         if (Auth::attempt($request->only('email','password'), $remember)) {
             $request->session()->regenerate();
 
-            $user = Auth::user();
+            $user    = Auth::user();
 
+            // Deteksi admin (jalan dengan/ tanpa Spatie)
+            $isAdmin = false;
             if (method_exists($user, 'hasRole') && $user->hasRole('admin')) {
-                return redirect()->intended(route('admin.dashboard'));
+                $isAdmin = true;
+            } elseif (Schema::hasColumn('users','role') && ($user->role ?? null) === 'admin') {
+                $isAdmin = true;
             }
 
-            // kalau kamu memang pakai role donatur
-            if (method_exists($user, 'hasRole') && $user->hasRole('donatur')) {
-                // arahkan ke halaman yang ADA
-                return redirect()->intended('/dashboard'); // atau '/donasi'
-            }
-
-            // fallback aman ke halaman umum yang ADA
-            return redirect()->intended('/dashboard');
+            // Arahkan:
+            return redirect()->intended(
+                $isAdmin ? route('admin.dashboard') : route('donor.money.create')
+            );
         }
 
         return back()->withErrors(['email' => 'Kredensial tidak cocok.'])->withInput();
     }
-
 
     public function logout(Request $request)
     {

@@ -16,7 +16,7 @@ use App\Http\Controllers\Admin\DashboardController;
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-| Semua route aplikasi Anda.
+| Semua route aplikasi.
 */
 
 /* =========================
@@ -48,32 +48,80 @@ Route::view('/dashboard', 'dashboard')->name('dashboard');
 Route::get('/kegiatan', [App\Http\Controllers\KegiatanController::class, 'index'])->name('kegiatan.index');
 Route::view('/about',   'aboutus')->name('about');
 
-Route::view('/donasi',                   'donasipage')->name('donasi.index');
-Route::view('/donasi/uang',             'donasi.form-uang')->name('donasi.uang');
-Route::view('/donasi/barang',           'donasi.form-barang')->name('donasi.barang');
-Route::view('/donasi/validasi-donasi',  'donasi.validasipage')->name('donasi.validasi');
-Route::view('/donasi/laporanpage',      'donasi.laporanpage')->name('donasi.laporan');
+/* Halaman donasi versi publik (tanpa login) */
+Route::view('/donasi',                  'donasipage')->name('donasi.index');
+// Route::view('/donasi/uang',            'donasi.form-uang')->name('donasi.uang');
+// Route::view('/donasi/barang',          'donasi.form-barang')->name('donasi.barang');
+// Route::view('/donasi/validasi-donasi', 'donasi.validasipage')->name('donasi.validasi');
+// Route::view('/donasi/laporanpage',     'donasi.laporanpage')->name('donasi.laporan');
 
-/* Resource contoh */
-Route::resource('images', App\Http\Controllers\ImageController::class)->only(['index','store','destroy'])->names([
-    'index'   => 'images.index',
-    'store'   => 'images.store',
-    'destroy' => 'images.destroy',
-]);
+// Jika guest mencoba akses URL lama /donasi/uang|barang|validasi-donasi|laporanpage → arahkan ke login
+Route::get('/donasi/{path}', function () {
+    return redirect()->route('login')->with('warning','Silakan login untuk mengakses fitur donasi.');
+})->where('path','uang|barang|validasi-donasi|laporanpage');
 
-/* (Opsional) Profil sederhana - butuh auth */
+/* Contoh resource */
+Route::resource('images', App\Http\Controllers\ImageController::class)
+    ->only(['index','store','destroy'])
+    ->names(['index'=>'images.index','store'=>'images.store','destroy'=>'images.destroy']);
+
+/* Profil sederhana */
 Route::middleware('auth')->get('/profile', fn() => 'Ini adalah halaman profil pengguna.')->name('profile.edit');
 
 
 /* =========================
-|  DONATUR (Auth + role:donatur)
+|  DONOR (Auth only)
+|  Semua user yang login otomatis dianggap "donatur".
+|  Gunakan prefix berbeda agar tidak bentrok dengan halaman publik.
 ========================= */
-Route::middleware(['auth','role:donatur'])
-    ->prefix('donatur')->as('donatur.')
+Route::middleware(['auth'])
+    ->prefix('member/donasi')->as('donor.')
     ->group(function () {
-        // Sediakan dashboard donatur supaya redirect tidak 404
-        Route::view('/dashboard', 'donatur.dashboard')->name('dashboard');
-        // Tambahkan route lain khusus donatur di sini jika perlu
+        // Tampilkan UI yang sama, tapi berada di area member
+        Route::view('/uang',   'donasi.form-uang')->name('money.create');
+        Route::view('/barang', 'donasi.form-barang')->name('goods.create');
+        Route::view('/validasi','donasi.validasipage')->name('proof.create');
+        Route::view('/riwayat','donasi.laporanpage')->name('history');
+
+        // (opsional) endpoint penyimpanan; sementara disiapkan minimal
+        Route::post('/uang', function (Request $r) {
+            $raw = preg_replace('/[^\d]/', '', (string) $r->input('jumlah','0'));
+            $jumlah = $raw === '' ? 0 : (int) $raw;
+
+            $r->validate([
+                'metode_pembayaran' => 'required|string',
+                'jumlah'            => 'nullable',
+            ]);
+
+            DB::table('donations')->insert([
+                'user_id'           => auth()->id(),
+                'jumlah'            => $jumlah,
+                'metode_pembayaran' => $r->metode_pembayaran,
+                'status'            => 'pending',      // admin yang verifikasi
+                'created_at'        => now(),
+                'updated_at'        => now(),
+            ]);
+
+            return back()->with('success','Donasi uang terkirim. Menunggu verifikasi.');
+        })->name('money.store');
+
+        Route::post('/barang', function (Request $r) {
+            // Simpan sebagai donasi barang (sesuaikan kolom sesuai skema tabelmu)
+            DB::table('donations')->insert([
+                'user_id'           => auth()->id(),
+                'jumlah'            => 0,
+                'metode_pembayaran' => 'barang',
+                'status'            => 'pending',
+                'created_at'        => now(),
+                'updated_at'        => now(),
+            ]);
+            return back()->with('success','Donasi barang terkirim. Menunggu verifikasi.');
+        })->name('goods.store');
+
+        Route::post('/validasi', function (Request $r) {
+            // Tempat upload bukti; sesuaikan storage & tabel bila sudah ada
+            return back()->with('success','Bukti donasi terkirim.');
+        })->name('proof.store');
     });
 
 
@@ -108,6 +156,9 @@ Route::middleware(['auth','role:admin'])
 
             if (method_exists($user, 'assignRole')) {
                 $user->assignRole($r->role);
+            } elseif (Schema::hasColumn('users','role')) {
+                $user->role = $r->role;
+                $user->save();
             }
 
             return redirect()->route('admin.users.index')->with('success','Pengguna dibuat.');
@@ -121,7 +172,6 @@ Route::middleware(['auth','role:admin'])
 
         // Store Donation — Admin = otomatis VERIFIED
         Route::post('/donations', function (Request $r) {
-            // Normalisasi angka (menerima 3.000.000 / 3,000,000 / 3000000)
             $rawJumlah = preg_replace('/[^\d]/', '', (string) $r->input('jumlah', '0'));
             $jumlah = $rawJumlah === '' ? 0 : (int) $rawJumlah;
 
@@ -132,24 +182,18 @@ Route::middleware(['auth','role:admin'])
             ]);
 
             return DB::transaction(function () use ($r, $jumlah) {
-
-                // (opsional) buat/temukan donatur bila email diisi (tanpa limit; boleh atas nama)
                 $userId = null;
                 if ($r->filled('email')) {
                     $user = \App\Models\User::firstOrCreate(
                         ['email' => $r->email],
-                        [
-                            'name'     => trim(($r->first_name.' '.$r->last_name) ?: $r->email),
-                            'password' => bcrypt(Str::random(12)),
-                        ]
+                        ['name' => trim(($r->first_name.' '.$r->last_name) ?: $r->email),
+                         'password' => bcrypt(Str::random(12))]
                     );
-                    if (method_exists($user, 'assignRole')) {
-                        $user->assignRole('donatur');
-                    }
+                    if (method_exists($user, 'assignRole')) { $user->assignRole('donatur'); }
+                    elseif (Schema::hasColumn('users','role') && !$user->role) { $user->role = 'donatur'; $user->save(); }
                     $userId = $user->id;
                 }
 
-                // Karena route ini di group role:admin, paksa status 'verified'
                 $donation = \App\Models\Donation::create([
                     'user_id'           => $userId,
                     'jumlah'            => $jumlah,
@@ -158,11 +202,9 @@ Route::middleware(['auth','role:admin'])
                     'status'            => 'verified',
                 ]);
 
-                // Simpan catatan verifikasi (kalau ada tabelnya & catatan diisi)
                 if ($r->filled('catatan') && Schema::hasTable('donation_verifications')) {
                     DB::table('donation_verifications')->insert([
-                        // NOTE: sesuaikan kolom FK sesuai skema Anda.
-                        // Jika kolomnya 'donation_id' di DB, ganti baris di bawah menjadi 'donation_id' => $donation->id,
+                        // ganti 'donasi_id' menjadi 'donation_id' jika itu nama kolom FK di tabelmu
                         'donasi_id'   => $donation->id,
                         'admin_id'    => auth()->id(),
                         'status'      => 'verified',
@@ -173,8 +215,7 @@ Route::middleware(['auth','role:admin'])
                     ]);
                 }
 
-                return redirect()->route('admin.donations.index')
-                                 ->with('success','Donasi disimpan dan diverifikasi.');
+                return redirect()->route('admin.donations.index')->with('success','Donasi disimpan dan diverifikasi.');
             });
         })->name('donations.store');
 

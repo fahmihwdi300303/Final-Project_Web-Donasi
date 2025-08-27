@@ -124,6 +124,13 @@
     {{-- Navbar global: akan menampilkan menu berbeda tergantung role --}}
     @include('partials.navbar.role-aware')
 
+        @if (session('warning'))
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-md p-3">
+        {{ session('warning') }}
+        </div>
+    </div>
+    @endif
     {{-- Page Heading (opsional, dipakai jika $header diset) --}}
     @if (isset($header))
       <header class="bg-white shadow">
