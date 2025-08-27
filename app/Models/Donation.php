@@ -15,11 +15,7 @@ class Donation extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
-        'user_id',
-        'jumlah',                // decimal(15,2)
-        'metode_pembayaran',
-        'bukti_transfer',        // ada di DB
-        'status',                // pending / verified / rejected
+        'user_id', 'jumlah', 'metode_pembayaran', 'bukti_transfer', 'status'
     ];
 
     protected $casts = [
