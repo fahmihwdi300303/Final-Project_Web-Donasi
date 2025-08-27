@@ -18,134 +18,108 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 |
 */
 
-Route::get('/', function () {
-    return view('homepage');
-});
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-});
-
+// ====== Public ======
+Route::view('/', 'homepage');
+Route::view('/dashboard', 'dashboard');
 Route::get('/kegiatan', [App\Http\Controllers\KegiatanController::class, 'index']);
+Route::view('/about', 'aboutus');
 
-// About Us Page
-Route::get('/about', function () {
-    return view('aboutus');
-});
+Route::view('/donasi', 'donasipage');
+Route::view('/donasi/uang', 'donasi.form-uang');
+Route::view('/donasi/barang', 'donasi.form-barang');
+Route::view('/donasi/validasi-donasi', 'donasi.validasipage');
+Route::view('/donasi/laporanpage', 'donasi.laporanpage');
 
-// Donation Routes
-Route::get('/donasi', function () {
-    return view('donasipage');
-});
-
-Route::get('/donasi/uang', function () {
-    return view('donasi.form-uang');
-});
-
-Route::get('/donasi/validasi-donasi', function () {
-    return view('donasi.validasipage');
-});
-
-Route::get('/donasi/barang', function () {
-    return view('donasi.form-barang');
-});
-
-Route::get('/donasi/laporanpage', function () {
-    return view('donasi.laporanpage');
-});
-
-// Donation Form Page
-Route::get('/donasi', function () {
-    return view('donasipage');
-});
-
-// Donation Validation Page (Admin)
-
-
-// Financial Report Page
-Route::get('/laporan', function () {
-    return view('laporanpage');
-});
-
-// Auth Pages
 Route::view('/login', 'login');
 Route::view('/register', 'register');
 Route::view('/forgot-password', 'forgot-password');
 
+Route::resource('images', App\Http\Controllers\ImageController::class)->only(['index','store','destroy']);
 
-
-// Image Management Routes
-Route::resource('images', App\Http\Controllers\ImageController::class);
-
-
-// route login bawaan Laravel
 Route::get('Auth', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('Auth', [AuthController::class, 'login']);
-
-// route logout
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
-// route khusus admin (pakai middleware)
-Route::middleware(['auth', 'is_admin'])->group(function () {
-    Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
-});
+Route::middleware('auth')->get('/profile', fn() => 'Ini adalah halaman profil pengguna.')->name('profile.edit');
 
-Route::middleware(['auth', 'is_admin'])->group(function () {
-    Route::get('/admin/dashboard', [DashboardController::class, 'index'])
-        ->name('admin.dashboard');
-});
 
-// TAMBAHKAN BLOK INI UNTUK MEMPERBAIKI ERROR PROFILE
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', function() {
-        // Untuk sementara, kita tampilkan teks saja.
-        // Nanti ini bisa diarahkan ke controller profile yang sesungguhnya.
-        return 'Ini adalah halaman profil pengguna.';
-    })->name('profile.edit');
-});
+Route::middleware(['auth','role:admin'])
+    ->prefix('admin')->as('admin.')
+    ->group(function () {
+        // Dashboard (pakai controller – lihat Langkah 2 di bawah)
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-Route::group(['middleware' => ['role:admin']], function () {
-    // Routes that only admins can access
-    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+        // Users
+        Route::view('/users',        'admin.users.index')->name('users.index');
+        Route::view('/users/create', 'admin.users.create')->name('users.create');
+        // (nanti kalau siap backend penuh, ganti jadi Route::resource('users', ...))
 
-    // =================================================================
-    // TAMBAHKAN SEMUA BARIS DI BAWAH INI UNTUK MEMPERBAIKI ERROR
-    // =================================================================
-    Route::get('/admin/users', function() {
-        return 'Halaman Manajemen Pengguna akan dibuat di sini.';
-    })->name('admin.users');
+        // Donations
+        Route::view('/donations',              'admin.donations.index')->name('donations.index');
+        Route::view('/donations/create',       'admin.donations.create')->name('donations.create');
+        Route::view('/donations/create-money', 'admin.donations.create-money')->name('donations.create-money');
+        Route::view('/donations/create-goods', 'admin.donations.create-goods')->name('donations.create-goods');
+        // (nanti bisa diganti ke Route::resource('donations', ...))
 
-    Route::get('/admin/donations', function() {
-        return 'Halaman Manajemen Donasi akan dibuat di sini.';
-    })->name('admin.donations');
+        // Reports
+        Route::view('/reports/donation',  'admin.reports.donation')->name('reports.donation');
+        Route::view('/reports/financial', 'admin.reports.financial')->name('reports.financial');
 
-    Route::get('/admin/donation-report', function() {
-        return 'Halaman Laporan Donasi akan dibuat di sini.';
-    })->name('admin.donation-report');
+        // === USERS: store ===
+Route::post('/users', function(\Illuminate\Http\Request $r) {
+    $r->validate([
+        'name'     => 'required|string|max:190',
+        'email'    => 'required|email|unique:users,email',
+        'password' => 'required|min:6',
+        'role'     => 'required|in:admin,donatur',
+    ]);
 
-    Route::get('/admin/financial-report', function() {
-        return 'Halaman Laporan Keuangan akan dibuat di sini.';
-    })->name('admin.financial-report');
-    // =================================================================
-});
+    $user = \App\Models\User::create([
+        'name'     => $r->name,
+        'email'    => $r->email,
+        'password' => bcrypt($r->password),
+    ]);
 
-Route::group(['middleware' => ['role:donatur']], function () {
-    // Routes that only donaturs can access
-    Route::get('/donatur/dashboard', [DonaturController::class, 'dashboard'])->name('donatur.dashboard');
-});
+    // kalau pakai spatie/permission
+    if (method_exists($user, 'assignRole')) {
+        $user->assignRole($r->role);
+    }
 
-Route::middleware(['auth'])->prefix('admin')->group(function () {
-    Route::view('/donations', 'admin.donations.index');               // /admin/donations
-    Route::view('/users',     'admin.users.index');                   // /admin/users
-    Route::view('/reports/donation',  'admin.reports.donation');      // /admin/reports/donation
-    Route::view('/reports/financial', 'admin.reports.financial');     // /admin/reports/financial
-});
+    return redirect()->route('admin.users.index')->with('success','Pengguna dibuat.');
+})->name('users.store');
 
-Route::middleware(['auth'])->prefix('admin')->group(function () {
-    // CRUD index sudah kamu akses via fallback /admin/donations & /admin/users
-    Route::view('/donations/create-money',  'admin.donations.create-money');
-    Route::view('/donations/create-goods',  'admin.donations.create-goods');
 
-    // Laporan donasi (admin)
-    Route::view('/reports/donation', 'admin.reports.donation');
-});
+// === DONATIONS: store ===
+// (dipakai oleh form create-money & create-goods yang action-nya route('admin.donations.store'))
+Route::post('/donations', function(\Illuminate\Http\Request $r) {
+    $r->validate([
+        'metode_pembayaran' => 'required|string',               // qris/transfer/cash/barang
+        'status'            => 'nullable|in:pending,verified,rejected',
+        'jumlah'            => 'nullable|numeric|min:0',
+        'email'             => 'nullable|email',
+    ]);
+
+    // opsional: auto-buat donatur jika email diisi
+    $userId = null;
+    if ($r->filled('email')) {
+        $u = \App\Models\User::firstOrCreate(
+            ['email' => $r->email],
+            ['name' => trim(($r->first_name.' '.$r->last_name) ?: $r->email),
+             'password' => bcrypt(\Illuminate\Support\Str::random(12))]
+        );
+        if (method_exists($u,'assignRole')) { $u->assignRole('donatur'); }
+        $userId = $u->id;
+    }
+
+    \App\Models\Donation::create([
+        'user_id'           => $userId,
+        'jumlah'            => $r->input('jumlah', 0),
+        'metode_pembayaran' => $r->metode_pembayaran,           // qris/transfer/cash/barang
+        'status'            => $r->input('status','pending'),
+        'catatan'           => $r->input('catatan'),
+    ]);
+
+            return redirect()->route('admin.donations.index')->with('success','Donasi disimpan.');
+        })->name('donations.store');
+    });
