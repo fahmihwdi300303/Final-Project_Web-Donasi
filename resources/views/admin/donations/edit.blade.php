@@ -10,8 +10,7 @@
   <div class="card">
     <div class="card-body">
       @php $id = data_get($donation,'donation_id', data_get($donation,'id')); @endphp
-      <form action="{{ Route::has('admin.donations.update') ? route('admin.donations.update',$id) : url('/admin/donations/'.$id) }}"
-            method="POST">
+      <form action="{{ route('admin.donations.update', $id) }}" method="POST">
         @csrf @method('PUT')
         <div class="row g-3">
           <div class="col-md-6">
@@ -49,8 +48,7 @@
         </div>
 
         <div class="d-flex justify-content-end gap-2 mt-4">
-          <a href="{{ Route::has('admin.donations.index') ? route('admin.donations.index') : url('/admin/donations') }}"
-             class="btn btn-outline">Kembali</a>
+          <a href="{{ route('admin.donations.index') }}" class="btn btn-outline">Kembali</a>
           <button class="btn btn-primary">Update</button>
         </div>
       </form>

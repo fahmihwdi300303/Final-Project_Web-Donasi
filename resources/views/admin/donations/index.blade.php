@@ -7,17 +7,27 @@
   @include('partials.breadcrumb',['segments'=>['Donasi']])
   <x-flash/>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="h4 mb-0">Manajemen Donasi</h1>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Manajemen Donasi</h1>
 
     <div class="btn-group">
-    <a class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" href="#">+ Tambah Donasi</a>
-    <ul class="dropdown-menu dropdown-menu-end">
+        {{-- klik tombol utama langsung ke Donasi Uang --}}
+        <a class="btn btn-primary" href="{{ route('admin.donations.create-money') }}">
+        + Tambah Donasi
+        </a>
+        {{-- panah kecil untuk pilihan lain --}}
+        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split"
+                data-bs-toggle="dropdown" aria-expanded="false">
+        <span class="visually-hidden">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
         <li><a class="dropdown-item" href="{{ route('admin.donations.create-money') }}">Donasi Uang</a></li>
         <li><a class="dropdown-item" href="{{ route('admin.donations.create-goods') }}">Donasi Barang</a></li>
-    </ul>
+        <li><a class="dropdown-item" href="{{ route('admin.donations.create') }}">Form Sederhana</a></li>
+        </ul>
     </div>
-</div>
+    </div>
+
 
   <div class="card">
     <div class="card-body">

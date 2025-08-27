@@ -54,17 +54,13 @@
     <div class="col-lg-4">
       <div class="card">
         <div class="card-body d-flex flex-column gap-2">
-          <a href="{{ Route::has('admin.donations.edit') ? route('admin.donations.edit',$id) : url('/admin/donations/'.$id.'/edit') }}"
-             class="btn btn-outline-secondary"><i class="fas fa-pen me-1"></i> Edit</a>
-          <form action="{{ Route::has('admin.donations.destroy') ? route('admin.donations.destroy',$id) : url('/admin/donations/'.$id) }}"
-                method="POST">
-            @csrf @method('DELETE')
+          <a href="{{ route('admin.donations.edit', $id) }}" class="btn btn-outline-secondary"><i class="fas fa-pen me-1"></i> Edit</a>
+          <form action="{{ route('admin.donations.destroy', $id) }}" method="POST"> @csrf @method('DELETE')
             <button class="btn btn-outline-danger" onclick="return confirm('Hapus donasi ini?')">
               <i class="fas fa-trash me-1"></i> Hapus
             </button>
           </form>
-          <a href="{{ Route::has('admin.donations.index') ? route('admin.donations.index') : url('/admin/donations') }}"
-             class="btn btn-primary"><i class="fas fa-arrow-left me-1"></i> Kembali</a>
+          <a href="{{ route('admin.donations.index') }}" class="btn btn-primary"><i class="fas fa-arrow-left me-1"></i> Kembali</a>
         </div>
       </div>
     </div>
