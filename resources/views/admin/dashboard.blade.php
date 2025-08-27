@@ -1,3 +1,4 @@
+@php use Illuminate\Support\Facades\Route; @endphp
 @extends('layouts.app')
 
 @section('title', 'Dashboard Admin - LKSA Yatim Muhammadiyah Karangasem')
@@ -105,35 +106,27 @@
     <div class="mb-5">
         <h2 class="text-center font-weight-bold mb-4">Aksi Cepat</h2>
         <div class="row g-4">
-            <div class="col-lg-3 col-md-6">
-                <a href="{{ route('admin.users') }}" class="action-card card text-center">
+            <div class="col-lg-4 col-md-8">
+                <a href="{{ route('admin.users.index') }}" class="action-card card text-center">
                     <div class="card-body">
                         <i class="fas fa-users mb-2"></i>
                         <h5 class="card-title">Manajemen User</h5>
                     </div>
                 </a>
             </div>
-            <div class="col-lg-3 col-md-6">
-                <a href="{{ route('admin.donations') }}" class="action-card card text-center">
+            <div class="col-lg-4 col-md-6">
+                <a href="{{ route('admin.donations.index') }}" class="action-card card text-center">
                     <div class="card-body">
                         <i class="fas fa-hand-holding-heart mb-2"></i>
                         <h5 class="card-title">Manajemen Donasi</h5>
                     </div>
                 </a>
             </div>
-            <div class="col-lg-3 col-md-6">
-                <a href="{{ route('admin.donation-report') }}" class="action-card card text-center">
+            <div class="col-lg-4 col-md-6">
+                <a href="{{ route('admin.reports.donation') }}" class="action-card card text-center">
                     <div class="card-body">
                         <i class="fas fa-chart-bar mb-2"></i>
                         <h5 class="card-title">Laporan Donasi</h5>
-                    </div>
-                </a>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <a href="{{ route('admin.financial-report') }}" class="action-card card text-center">
-                    <div class="card-body">
-                        <i class="fas fa-chart-line mb-2"></i>
-                        <h5 class="card-title">Laporan Keuangan</h5>
                     </div>
                 </a>
             </div>

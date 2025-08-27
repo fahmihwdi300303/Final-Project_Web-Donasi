@@ -12,7 +12,7 @@
     {{-- KIRI: Form --}}
     <div class="col-lg-7">
       <div class="form-card">
-        <form action="{{ Route::has('admin.donations.store') ? route('admin.donations.store') : url('/admin/donations') }}" method="POST">
+        <form action="{{ route('admin.donations.store') }}" method="POST">
           @csrf
           <div class="row g-3">
             <div class="col-md-6">
@@ -47,7 +47,7 @@
 
             <div class="col-md-6">
               <label class="form-label">Status</label>
-              <select name="status" class="form-select">
+              <input type="hidden" name="status" value="verified">
                 <option value="pending">Pending</option>
                 <option value="verified">Verified</option>
                 <option value="rejected">Rejected</option>
@@ -61,7 +61,7 @@
           </div>
 
           <div class="d-flex justify-content-end gap-2 mt-4">
-            <a href="{{ Route::has('admin.donations.index') ? route('admin.donations.index') : url('/admin/donations') }}" class="btn btn-outline">Batal</a>
+            <a href="{{ route('admin.donations.index') }}" class="btn btn-outline">Batal</a>
             <button class="btn btn-primary">Simpan</button>
           </div>
         </form>
