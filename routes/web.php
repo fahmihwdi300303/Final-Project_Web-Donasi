@@ -6,13 +6,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Admin\DashboardController;
-
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Admin\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,56 +19,68 @@ use App\Http\Controllers\Auth\NewPasswordController;
 | Semua route aplikasi Anda.
 */
 
+/* =========================
+|  AUTH (Guest only)
+========================= */
 Route::middleware('guest')->group(function () {
     Route::get('/login',    [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login',   [LoginController::class, 'login'])->name('login.perform');
+
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register',[RegisterController::class, 'register'])->name('register.perform');
-    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
-    Route::post('/forgot-password',[PasswordResetLinkController::class, 'store'])->name('password.email');
+
+    Route::get('/forgot-password',      [PasswordResetLinkController::class, 'create'])->name('password.request');
+    Route::post('/forgot-password',     [PasswordResetLinkController::class, 'store'])->name('password.email');
     Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
     Route::post('/reset-password',        [NewPasswordController::class, 'store'])->name('password.update');
 });
 
+/* Logout (Auth only) */
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
+
 
 /* =========================
 |  PUBLIC (Landing)
 ========================= */
-Route::view('/', 'homepage');
-Route::view('/dashboard', 'dashboard');
+Route::view('/',          'homepage')->name('home');
+Route::view('/dashboard', 'dashboard')->name('dashboard');
 
-Route::get('/kegiatan', [App\Http\Controllers\KegiatanController::class, 'index']);
-Route::view('/about', 'aboutus');
+Route::get('/kegiatan', [App\Http\Controllers\KegiatanController::class, 'index'])->name('kegiatan.index');
+Route::view('/about',   'aboutus')->name('about');
 
-Route::view('/donasi',              'donasipage');
-Route::view('/donasi/uang',         'donasi.form-uang');
-Route::view('/donasi/barang',       'donasi.form-barang');
-Route::view('/donasi/validasi-donasi', 'donasi.validasipage');
-Route::view('/donasi/laporanpage',  'donasi.laporanpage');
+Route::view('/donasi',                   'donasipage')->name('donasi.index');
+Route::view('/donasi/uang',             'donasi.form-uang')->name('donasi.uang');
+Route::view('/donasi/barang',           'donasi.form-barang')->name('donasi.barang');
+Route::view('/donasi/validasi-donasi',  'donasi.validasipage')->name('donasi.validasi');
+Route::view('/donasi/laporanpage',      'donasi.laporanpage')->name('donasi.laporan');
 
-/* Resource contoh (biarkan sesuai kebutuhan Anda) */
-Route::resource('images', App\Http\Controllers\ImageController::class)->only(['index','store','destroy']);
+/* Resource contoh */
+Route::resource('images', App\Http\Controllers\ImageController::class)->only(['index','store','destroy'])->names([
+    'index'   => 'images.index',
+    'store'   => 'images.store',
+    'destroy' => 'images.destroy',
+]);
 
-/* Auth (view sederhana) */
-Route::view('/login', 'login');
-Route::view('/register', 'register');
-Route::view('/forgot-password', 'forgot-password');
-
-
-/* Login/Logout bawaan Anda */
-Route::get('Auth',  [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('Auth', [AuthController::class, 'login']);
-Route::post('logout', [LoginController::class, 'logout'])->name('logout');
-
-/* Hotfix profile */
+/* (Opsional) Profil sederhana - butuh auth */
 Route::middleware('auth')->get('/profile', fn() => 'Ini adalah halaman profil pengguna.')->name('profile.edit');
+
+
+/* =========================
+|  DONATUR (Auth + role:donatur)
+========================= */
+Route::middleware(['auth','role:donatur'])
+    ->prefix('donatur')->as('donatur.')
+    ->group(function () {
+        // Sediakan dashboard donatur supaya redirect tidak 404
+        Route::view('/dashboard', 'donatur.dashboard')->name('dashboard');
+        // Tambahkan route lain khusus donatur di sini jika perlu
+    });
 
 
 /* =========================
 |  ADMIN (Auth + role:admin)
 ========================= */
-Route::middleware(['auth','role:admin.'])
+Route::middleware(['auth','role:admin'])
     ->prefix('admin')->as('admin.')
     ->group(function () {
 
@@ -151,7 +161,9 @@ Route::middleware(['auth','role:admin.'])
                 // Simpan catatan verifikasi (kalau ada tabelnya & catatan diisi)
                 if ($r->filled('catatan') && Schema::hasTable('donation_verifications')) {
                     DB::table('donation_verifications')->insert([
-                        'donasi_id'   => $donation->donation_id,
+                        // NOTE: sesuaikan kolom FK sesuai skema Anda.
+                        // Jika kolomnya 'donation_id' di DB, ganti baris di bawah menjadi 'donation_id' => $donation->id,
+                        'donasi_id'   => $donation->id,
                         'admin_id'    => auth()->id(),
                         'status'      => 'verified',
                         'catatan'     => $r->catatan,
@@ -170,5 +182,3 @@ Route::middleware(['auth','role:admin.'])
         Route::view('/reports/donation',  'admin.reports.donation')->name('reports.donation');
         Route::view('/reports/financial', 'admin.reports.financial')->name('reports.financial');
     });
-
-
