@@ -15,7 +15,11 @@
             <img src="{{ asset('storage\logolksa.png') }}" alt="Logo LKSA">
         </div>
         <h1 id="login-title" class="auth-title">Masuk ke Akun Anda</h1>
-
+        @if (session('success'))
+            <div class="bg-green-50 border border-green-200 text-green-700 p-3 rounded mb-3">
+                {{ session('success') }}
+            </div>
+        @endif
         <form action="{{ route('login') }}" method="POST" class="auth-form" novalidate>
             @csrf
             <div class="form-group">

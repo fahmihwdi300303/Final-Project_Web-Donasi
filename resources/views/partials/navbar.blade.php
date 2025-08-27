@@ -2,10 +2,9 @@
 <header class="header">
     <div class="header-container">
     <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}">
-    <img src="{{ asset('storage/logolksa.png') }}" alt="logolksa" class="me-2" style="height: 50px;">
+    <img src="{{ asset('/storage\logolksa.png') }}" alt="logolksa" class="me-2" style="height: 50px;">
     <span class="logo-text fw-bold">LKSA PANTI ASUHAN YATIM</span>
 </a>
-
         <!-- Navigation -->
         <nav class="nav">
             <a href="/" class="nav-link {{ request()->is('/') ? 'active' : '' }}">Beranda</a>
@@ -43,7 +42,6 @@
                 <button class="btn btn-outline" onclick="goToLogin()">Masuk</button>
                 <button class="btn btn-primary" onclick="goToRegister()">Daftar</button>
             </div>
-
         <!-- Mobile Menu Toggle -->
         <div class="mobile-menu-toggle">
             <i class="fas fa-bars"></i>

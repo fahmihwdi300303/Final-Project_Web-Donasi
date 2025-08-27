@@ -10,12 +10,29 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
 
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 | Semua route aplikasi Anda.
 */
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login',    [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login',   [LoginController::class, 'login'])->name('login.perform');
+    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register',[RegisterController::class, 'register'])->name('register.perform');
+    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+    Route::post('/forgot-password',[PasswordResetLinkController::class, 'store'])->name('password.email');
+    Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+    Route::post('/reset-password',        [NewPasswordController::class, 'store'])->name('password.update');
+});
+
+Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
 /* =========================
 |  PUBLIC (Landing)
@@ -32,13 +49,14 @@ Route::view('/donasi/barang',       'donasi.form-barang');
 Route::view('/donasi/validasi-donasi', 'donasi.validasipage');
 Route::view('/donasi/laporanpage',  'donasi.laporanpage');
 
+/* Resource contoh (biarkan sesuai kebutuhan Anda) */
+Route::resource('images', App\Http\Controllers\ImageController::class)->only(['index','store','destroy']);
+
 /* Auth (view sederhana) */
 Route::view('/login', 'login');
 Route::view('/register', 'register');
 Route::view('/forgot-password', 'forgot-password');
 
-/* Resource contoh (biarkan sesuai kebutuhan Anda) */
-Route::resource('images', App\Http\Controllers\ImageController::class)->only(['index','store','destroy']);
 
 /* Login/Logout bawaan Anda */
 Route::get('Auth',  [AuthController::class, 'showLoginForm'])->name('login');
@@ -52,7 +70,7 @@ Route::middleware('auth')->get('/profile', fn() => 'Ini adalah halaman profil pe
 /* =========================
 |  ADMIN (Auth + role:admin)
 ========================= */
-Route::middleware(['auth','role:admin'])
+Route::middleware(['auth','role:admin.'])
     ->prefix('admin')->as('admin.')
     ->group(function () {
 
@@ -152,3 +170,5 @@ Route::middleware(['auth','role:admin'])
         Route::view('/reports/donation',  'admin.reports.donation')->name('reports.donation');
         Route::view('/reports/financial', 'admin.reports.financial')->name('reports.financial');
     });
+
+

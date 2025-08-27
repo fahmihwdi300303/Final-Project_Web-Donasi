@@ -15,7 +15,8 @@
         </div>
         <h1 id="register-title" class="auth-title">Daftar Sekarang!</h1>
 
-        <form id="registerForm" class="auth-form" novalidate>
+        <form method="POST" action="{{ route('register.perform') }}" id="register-form">
+            @csrf
             <div class="grid">
                 <div class="form-group">
                     <label for="first_name">Nama Depan</label>
@@ -47,14 +48,20 @@
                 <small class="error" data-error-for="password" aria-live="polite"></small>
             </div>
 
-            <div class="form-actions">
+            <div class="form-actions" form>
                 <button type="submit" class="btn btn-primary">Daftar</button>
             </div>
         </form>
-
         <div class="extra-links">
             <p>Sudah punya akun? <a href="/login">Masuk</a></p>
         </div>
     </section>
+    <script>
+        document.getElementById('register-form').addEventListener('submit', function(){
+        const fn = (document.getElementById('first_name')?.value || '').trim();
+        const ln = (document.getElementById('last_name')?.value  || '').trim();
+        document.getElementById('full_name').value = (fn + ' ' + ln).trim() || fn || ln;
+    });
+</script>
 </main>
 

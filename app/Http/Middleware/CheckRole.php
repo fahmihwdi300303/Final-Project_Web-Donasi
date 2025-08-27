@@ -13,16 +13,20 @@ class CheckRole
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $role): Response
-    {
-        if (!auth()->check()) {
-            return redirect('/login');
-        }
+public function handle($request, Closure $next, ...$roles)
+{
+    $u = auth()->user();
+    if (!$u) abort(403);
 
-        if (!auth()->user()->hasRole($role)) {
-            abort(403, 'Unauthorized access.');
-        }
-
-        return $next($request);
+    // 1) spatie/permission
+    if (method_exists($u, 'hasRole')) {
+        foreach ($roles as $r) if ($u->hasRole($r)) return $next($request);
     }
+    // 2) kolom users.role
+    if (\Illuminate\Support\Facades\Schema::hasColumn('users','role')) {
+        if (in_array($u->role, $roles)) return $next($request);
+    }
+    abort(403);
+}
+
 }
