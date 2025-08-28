@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Schema;
 
 class RegisterController extends Controller
@@ -16,30 +18,35 @@ class RegisterController extends Controller
         return view('register');
     }
 
-    public function register(Request $r)
+    public function register(Request $request)
     {
-        $rules = [
-            'email'    => ['required','email','max:190','unique:users,email'],
-            'password' => ['required','min:6'],
-        ];
-        if ($r->filled('password_confirmation')) $rules['password'][] = 'confirmed';
-        $r->validate($rules);
+        $data = $request->validate([
+            'first_name' => 'required|string|max:120',
+            'last_name'  => 'nullable|string|max:120',
+            'email'      => 'required|email:rfc,dns|unique:users,email',
+            'phone'      => 'nullable|string|max:30',
+            'password'   => ['required', Password::min(6)],
+        ]);
 
-        $name = trim(($r->input('name') ?: '') ?: (($r->input('first_name').' '.$r->input('last_name'))));
-        if ($name === '') $name = $r->email;
+        $user = User::create([
+            'name'     => trim(($data['first_name'].' '.($data['last_name'] ?? ''))),
+            'email'    => $data['email'],
+            'password' => Hash::make($data['password']),
+            // Simpan no. HP hanya kalau kolom ada
+            ...(Schema::hasColumn('users','phone') ? ['phone' => $data['phone'] ?? null] : []),
+        ]);
 
-        $data = [
-            'name'     => $name,
-            'email'    => $r->email,
-            'password' => \Illuminate\Support\Facades\Hash::make($r->password),
-        ];
-        if (\Illuminate\Support\Facades\Schema::hasColumn('users','phone') && $r->filled('phone')) {
-            $data['phone'] = $r->phone;
+        // status/role donatur (tanpa membatasi peran lain)
+        if (method_exists($user, 'assignRole')) {
+            $user->assignRole('donatur'); // abaikan kalau tidak pakai spatie/permission
         }
-        // ❌ Tidak set kolom role di sini
-        $user = \App\Models\User::create($data);
 
-        // ❌ Tidak assignRole apa pun
-        return redirect()->route('login')->with('success','Akun berhasil dibuat. Silakan masuk.');
+        event(new Registered($user));
+
+        // JANGAN langsung login — arahkan ke halaman login
+        Auth::logout();
+
+        return redirect()->route('login')
+            ->with('success', 'Pendaftaran berhasil. Silakan login untuk mulai berdonasi.');
     }
 }
