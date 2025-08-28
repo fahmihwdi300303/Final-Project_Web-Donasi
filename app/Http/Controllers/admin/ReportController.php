@@ -4,33 +4,38 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Donation;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ReportController extends Controller
 {
-    public function donation()
+    public function donation(Request $request)
     {
-        $donations = Donation::with('user')->latest()->get();
+        $year     = (int) $request->get('year', now()->year);
+        $semester = (string) $request->get('semester', (now()->month <= 6 ? '1' : '2')); // '1'|'2'|'all'
 
-        $summary = [
-            'total_count'    => $donations->count(),
-            'total_amount'   => (int) $donations->sum('jumlah'),
-            'verified_count' => $donations->where('status','verified')->count(),
-            'pending_count'  => $donations->where('status','pending')->count(),
-            'verified_amount'=> (int) $donations->where('status','verified')->sum('jumlah'),
-        ];
+        if ($semester === 'all') {
+            $start = Carbon::create($year, 1, 1)->startOfDay();
+            $end   = Carbon::create($year, 12, 31)->endOfDay();
+        } elseif ($semester === '1') {
+            $start = Carbon::create($year, 1, 1)->startOfDay();
+            $end   = Carbon::create($year, 6, 30)->endOfDay();
+        } else {
+            $start = Carbon::create($year, 7, 1)->startOfDay();
+            $end   = Carbon::create($year, 12, 31)->endOfDay();
+        }
 
-        return view('admin.reports.donation', [
-            'rows'     => $donations,
-            'summary'  => $summary,
-        ]);
-    }
+        $base = Donation::with('user')
+            ->where('status', 'verified')
+            ->whereBetween('created_at', [$start, $end]);
 
-    public function financial()
-    {
-        // Jika belum ada modul pengeluaran, tampilkan kosong namun halaman tetap hidup
-        return view('admin.reports.financial', [
-            'finance'      => ['opening_balance'=>0,'income'=>0,'expense'=>0],
-            'transactions' => [],
-        ]);
+        $rows  = (clone $base)->orderByDesc('created_at')->get();
+        $total = (clone $base)->sum('jumlah');
+        $chart = (clone $base)
+            ->select(DB::raw('DATE_FORMAT(created_at, "%Y-%m") as ym'), DB::raw('SUM(jumlah) as total'))
+            ->groupBy('ym')->orderBy('ym')->get();
+
+        return view('admin.reports.donation', compact('rows','total','year','semester','start','end','chart'));
     }
 }

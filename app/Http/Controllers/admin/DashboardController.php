@@ -61,16 +61,18 @@ class DashboardController extends Controller
 
         // ---- TOP DONATUR (verified) ----
         $topDonors = Donation::select('user_id', DB::raw('SUM(jumlah) as total'))
-            ->where('status','verified')->whereNotNull('user_id')
-            ->groupBy('user_id')->orderByDesc('total')->take(5)->get()
-            ->map(function($row){
-                $u = User::find($row->user_id);
-                return [
-                    'name'  => $u?->name ?? 'Anonim',
-                    'email' => $u?->email ?? '-',
-                    'total' => (int) $row->total,
-                ];
-            });
+            ->where('status', 'verified')
+            ->whereNotNull('user_id')
+            ->groupBy('user_id')
+            ->orderByDesc('total')
+            ->take(5)
+            ->with('user:id,name,email') // <-- pakai relasi
+            ->get()
+            ->map(fn($row) => [
+                'name'  => optional($row->user)->name ?? 'Anonim',
+                'email' => optional($row->user)->email ?? '-',
+                'total' => (int) $row->total,
+            ]);
 
         // ---- AKTIVITAS TERBARU: gabung donasi & user ----
         $recentDonations = Donation::with('user')->latest()->take(5)->get()->map(function($d){

@@ -8,75 +8,22 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function index()
+    // List & filter sederhana
+    public function index(Request $request)
     {
-        $users = User::latest()->get();
+        $q = User::query()->latest();
+
+        // optional: pencarian nama/email
+        if ($request->filled('s')) {
+            $s = $request->s;
+            $q->where(function ($qq) use ($s) {
+                $qq->where('name', 'like', "%$s%")
+                   ->orWhere('email', 'like', "%$s%");
+            });
+        }
+
+        $users = $q->paginate(10)->withQueryString();
+
         return view('admin.users.index', compact('users'));
-    }
-
-    public function create()
-    {
-        return view('admin.users.create');
-    }
-
-    public function store(Request $r)
-    {
-        $r->validate([
-            'name' => 'required|string|max:190',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
-            'role' => 'required|in:admin,donatur',
-        ]);
-
-        $user = User::create([
-            'name' => $r->name,
-            'email' => $r->email,
-            'password' => bcrypt($r->password),
-        ]);
-
-        if (method_exists($user,'assignRole')) {
-            $user->assignRole($r->role);
-        }
-
-        return redirect()->route('admin.users.index')->with('success','Pengguna dibuat.');
-    }
-
-    public function show(User $user)
-    {
-        return view('admin.users.show', compact('user'));
-    }
-
-    public function edit(User $user)
-    {
-        return view('admin.users.edit', compact('user'));
-    }
-
-    public function update(Request $r, User $user)
-    {
-        $r->validate([
-            'name' => 'required|string|max:190',
-            'email' => 'required|email|unique:users,email,'.$user->id,
-            'password' => 'nullable|min:6',
-            'role' => 'required|in:admin,donatur',
-        ]);
-
-        $data = [
-            'name' => $r->name,
-            'email' => $r->email,
-        ];
-        if ($r->filled('password')) { $data['password'] = bcrypt($r->password); }
-        $user->update($data);
-
-        if (method_exists($user,'syncRoles')) {
-            $user->syncRoles([$r->role]);
-        }
-
-        return redirect()->route('admin.users.index')->with('success','Pengguna diperbarui.');
-    }
-
-    public function destroy(User $user)
-    {
-        $user->delete();
-        return redirect()->route('admin.users.index')->with('success','Pengguna dihapus.');
     }
 }
