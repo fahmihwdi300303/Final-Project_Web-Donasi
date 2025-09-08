@@ -67,8 +67,13 @@ class User extends Authenticatable
         return $this->hasRole('user');
     }
 
+// app/Models/User.php
     public function donations()
     {
-        return $this->hasMany(Donation::class);
+        return $this->hasMany(\App\Models\Donation::class);
+    }
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class);
     }
 }
