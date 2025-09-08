@@ -1,87 +1,123 @@
 @extends('layouts.app')
+
 @section('title','Manajemen Donasi')
-@php use Illuminate\Support\Facades\Route; @endphp
 
 @section('content')
-<div class="container py-4 theme-blue">
-  @include('partials.breadcrumb',['segments'=>['Donasi']])
-  <x-flash/>
-
+<div class="container py-4">
+    @includeFirst(['partials.navbar.breadcrumb','partials.breadcrumb'], ['segments'=>['Donasi']])
     <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h4 mb-0">Manajemen Donasi</h1>
-
-    <div class="btn-group">
-        {{-- klik tombol utama langsung ke Donasi Uang --}}
-        <a class="btn btn-primary" href="{{ route('admin.donations.create-money') }}">
-        + Tambah Donasi
-        </a>
-        {{-- panah kecil untuk pilihan lain --}}
-        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split"
-                data-bs-toggle="dropdown" aria-expanded="false">
-        <span class="visually-hidden">Toggle Dropdown</span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" href="{{ route('admin.donations.create-money') }}">Donasi Uang</a></li>
-        <li><a class="dropdown-item" href="{{ route('admin.donations.create-goods') }}">Donasi Barang</a></li>
-        <li><a class="dropdown-item" href="{{ route('admin.donations.create') }}">Form Sederhana</a></li>
-        </ul>
-    </div>
+        <h1 class="h4 m-0">Manajemen Donasi</h1>
+        {{-- tombol tambah (admin create manual) --}}
+        <a href="{{ route('admin.donations.create') }}" class="btn btn-primary">+ Tambah Donasi</a>
     </div>
 
+    {{-- Filter sederhana --}}
+    <form class="row g-2 mb-3" method="get">
+        <div class="col-auto">
+            <input type="text" name="s" value="{{ request('s') }}" class="form-control" placeholder="Cari donatur (nama/email)">
+        </div>
+        <div class="col-auto">
+            <select name="status" class="form-select">
+                <option value="">Semua status</option>
+                @foreach (['pending'=>'Pending','verified'=>'Verified','rejected'=>'Rejected'] as $k=>$v)
+                    <option value="{{ $k }}" @selected(request('status')===$k)>{{ $v }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-auto">
+            <select name="metode" class="form-select">
+                <option value="">Semua metode</option>
+                @foreach (['qris'=>'QRIS','transfer'=>'Transfer','cash'=>'Cash','barang'=>'Barang'] as $k=>$v)
+                    <option value="{{ $k }}" @selected(request('metode')===$k)>{{ $v }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-outline-primary">Filter</button>
+        </div>
+    </form>
 
-  <div class="card">
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle table-admin">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Tanggal</th>
-              <th>Donatur</th>
-              <th>Jumlah</th>
-              <th>Metode</th>
-              <th>Status</th>
-              <th class="text-end">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            @forelse(($donations ?? []) as $i => $d)
-              @php
-                $id     = data_get($d,'donation_id', data_get($d,'id'));
-                $nama   = data_get($d,'user.name','—');
-                $jumlah = data_get($d,'jumlah', data_get($d,'amount',0));
-                $metode = strtoupper(data_get($d,'metode_pembayaran', data_get($d,'method','-')));
-                $status = strtolower(data_get($d,'status','pending'));
-              @endphp
-              <tr>
-                <td>{{ $i+1 }}</td>
-                <td>{{ data_get($d,'created_at') ? \Carbon\Carbon::parse($d->created_at)->format('d/m/Y H:i') : '—' }}</td>
-                <td>{{ $nama }}</td>
-                <td>Rp {{ number_format($jumlah,0,',','.') }}</td>
-                <td>{{ $metode }}</td>
-                <td>
-                  <span class="badge bg-{{ $status==='verified'?'success':($status==='pending'?'warning text-dark':'danger') }}">
-                    {{ ucfirst($status) }}
-                  </span>
-                </td>
-                <td class="text-end">
-                    <a href="{{ route('admin.donations.show', $id) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
-                    <a href="{{ route('admin.donations.edit', $id) }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-pen"></i></a>
-                    <form action="{{ route('admin.donations.destroy', $id) }}" method="POST" class="d-inline">
-                    @csrf @method('DELETE')
-                    <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus donasi ini?')">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                    </form>
-                </td>
-              </tr>
-            @empty
-              <tr><td colspan="7" class="text-center text-muted py-5">Belum ada data donasi.</td></tr>
-            @endforelse
-          </tbody>
-        </table>
-      </div>
+    <div class="card">
+        <div class="card-body table-responsive overflow-visible" >
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Tanggal</th>
+                        <th>Donatur</th>
+                        <th>Jumlah</th>
+                        <th>Metode</th>
+                        <th>Status</th>
+                        <th class="text-end">Aksi</th>
+                    </tr>
+                </thead>
+                    <tbody>
+                    @php $no = ($donations->currentPage()-1) * $donations->perPage(); @endphp
+                    @forelse ($donations as $d)
+                        @php
+                            $badge = ['pending'=>'warning','verified'=>'success','rejected'=>'danger'][$d->status] ?? 'secondary';
+                        @endphp
+                        <tr>
+                            <td>{{ ++$no }}</td>
+                            <td>{{ optional($d->created_at)->format('d M Y') }}</td>
+                            <td>
+                                {{ optional($d->user)->name ?? '—' }}
+                                <div class="small text-muted">{{ optional($d->user)->email }}</div>
+                            </td>
+                            <td>Rp {{ number_format((int) $d->jumlah, 0, ',', '.') }}</td>
+                            <td class="text-uppercase">{{ $d->metode_pembayaran }}</td>
+                            <td>
+                                <span class="badge bg-{{ $badge }}">{{ ucfirst($d->status) }}</span>
+                            </td>
+
+                            {{-- Aksi di kolom terakhir --}}
+                            <td class="text-end">
+                            <div class="dropdown position-static">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                        type="button"
+                                        data-bs-toggle="dropdown"
+                                        data-bs-display="static"   {{-- penting: cegah ter-clip oleh overflow --}}
+                                        aria-expanded="false">
+                                Aksi
+                                </button>
+
+                                <div class="dropdown-menu dropdown-menu-end shadow">
+                                {{-- Verified --}}
+                                <form action="{{ route('admin.donations.status', ['donation' => $d->getKey()]) }}" method="POST" class="px-2">
+                                    @csrf @method('PATCH')
+                                    <input type="hidden" name="status" value="verified">
+                                    <button type="submit" class="dropdown-item">Tandai Verified</button>
+                                </form>
+
+                                {{-- Pending --}}
+                                <form action="{{ route('admin.donations.status', ['donation' => $d->getKey()]) }}" method="POST" class="px-2">
+                                    @csrf @method('PATCH')
+                                    <input type="hidden" name="status" value="pending">
+                                    <button type="submit" class="dropdown-item">Tandai Pending</button>
+                                </form>
+
+                                {{-- Rejected --}}
+                                <form action="{{ route('admin.donations.status', ['donation' => $d->getKey()]) }}" method="POST" class="px-2">
+                                    @csrf @method('PATCH')
+                                    <input type="hidden" name="status" value="rejected">
+                                    <button type="submit" class="dropdown-item text-danger">Tandai Rejected</button>
+                                </form>
+                                </div>
+                            </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">Belum ada data donasi.</td>
+                        </tr>
+                    @endforelse
+                    </tbody>
+
+            </table>
+            <div class="mt-3">
+                {{ $donations->links() }}
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 @endsection
