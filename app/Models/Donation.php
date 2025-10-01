@@ -7,23 +7,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Donation extends Model
 {
-    use HasFactory;
-
     protected $table = 'donations';
-    protected $primaryKey = 'donation_id';
-    public $incrementing = true;
-    protected $keyType = 'int';
-
-    protected $fillable = [
-        'user_id', 'jumlah', 'metode_pembayaran', 'bukti_transfer', 'status'
-    ];
-
-    protected $casts = [
-        'jumlah' => 'decimal:2',
-    ];
+    protected $primaryKey = 'donation_id'; // <- ganti sesuai kolom PK sebenarnya
+    public $incrementing = true;           // atau false kalau bukan auto-increment
+    protected $keyType = 'int';            // atau 'string' sesuai tipe
+    protected $fillable = ['user_id','jumlah','metode_pembayaran','status','bukti_transfer'];
 
     public function user()
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 }
